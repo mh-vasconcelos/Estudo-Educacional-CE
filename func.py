@@ -8,12 +8,10 @@ import plotly.express as px
 # Carregador de Dados
 @st.cache_data
 def load_data():
-    # Carrega os CSVs (Certifique-se que eles estão na mesma pasta)
     df19 = pd.read_csv('indicadores19.csv')
     df24 = pd.read_csv('indicadores24.csv')
     
-    # Padronização de Nomes para o Dashboard
-    # Ajuste conforme o nome real das suas colunas nos arquivos
+
     df19 = df19.rename(columns={
         'NO_MUNICIPIO_RESIDENCIA': 'Municipio', 
         'Computador': 'Total_Computador', 
@@ -82,7 +80,6 @@ def grafico_comparativo(df_indicadores_mun, df_indicadores_mun24, notas = False)
   st.write("### Tabela Resumo")
   st.dataframe(df_resumo_executivo.sort_values(by=['Variação (%)'], ascending=False)) 
 
-  # Gerar gráfico
   df_plot = df_resumo_executivo[df_resumo_executivo['Indicador'] != 'Total de Alunos (Soma Estado)'].melt(
       id_vars='Indicador', 
       value_vars=['2019', '2024'], 
@@ -90,15 +87,13 @@ def grafico_comparativo(df_indicadores_mun, df_indicadores_mun24, notas = False)
       value_name='Valor'
   )
 
-  # CORREÇÃO 2: Criar figura e eixos explicitamente
   fig, ax = plt.subplots(figsize=(14, 9))
   
-  # Passar ax=ax para o Seaborn desenhar nessa figura específica
   grafico = sns.barplot(data=df_plot, x='Indicador', y='Valor', hue='Ano', palette=['gray', 'blue'], ax=ax)
 
   ax.set_title('Comparativo de Indicadores: 2019 vs 2024', fontsize=14)
   ax.set_ylabel('Taxa Média / Nota')
-  plt.xticks(rotation=15) # Funciona, mas ax.tick_params é mais seguro no Streamlit
+  plt.xticks(rotation=15) 
   ax.legend(title='Ano')
 
   for container in grafico.containers:
@@ -127,10 +122,9 @@ def gerar_histograma(df, coluna, cor, titulo, x_label, is_nota=False):
         xaxis_title=x_label, 
         yaxis_title="Qtd. Municípios", 
         showlegend=False,
-        margin=dict(l=20, r=20, t=40, b=20) # Margens para ajustar melhor
+        margin=dict(l=20, r=20, t=40, b=20)
     )
     
-    # Lógica de escala fixa (0 a 1) para taxas, livre para notas
     if not is_nota:
         fig.update_xaxes(range=[0, 1])
         

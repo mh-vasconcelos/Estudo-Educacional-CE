@@ -228,7 +228,7 @@ with st.container(border=True):
             df=df19,
             coluna='Nota_Media_Geral',
             cor='#8e44ad', # roxo
-            titulo="Distribuição dos Municípios (2019)",
+            titulo="Distribuição dos Municípios (2023)",
             x_label='📝 Nota Média do ENEM',
             is_nota=True
         )
@@ -252,7 +252,7 @@ with st.container(border=True):
         with st.expander("Ver Dados Detalhados por Município"):
             df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df23[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
             df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
-            df_merge_enem['Nota_Media_Geral_24'] = round(df_merge_enem['Nota_Media_Geral_24'], 2)
+            df_merge_enem['Nota_Media_Geral_23'] = round(df_merge_enem['Nota_Media_Geral_23'], 2)
             df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_24'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
             # df_merge_enem['Nota_Media_Geral_19'] = df_merge_enem['Nota_Media_Geral_19'].map('{:.2f}'.format)
             # df_merge_enem['Nota_Media_Geral_24'] = df_merge_enem['Nota_Media_Geral_24'].map('{:.2f}'.format)
@@ -351,7 +351,7 @@ with st.container(border=True):
         with st.expander("🔍 Ver Dados Detalhados por Município"):
             df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df23[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_24'))
             df_merge_corr[f'{metrica_selecionada}_19'] = round((df_merge_corr[f'{metrica_selecionada}_19']) * 1, 4)
-            df_merge_corr[f'{metrica_selecionada}_24'] = round((df_merge_corr[f'{metrica_selecionada}_24']) * 1, 4)
+            df_merge_corr[f'{metrica_selecionada}_23'] = round((df_merge_corr[f'{metrica_selecionada}_23']) * 1, 4)
             st.dataframe(df_merge_corr)
 
 

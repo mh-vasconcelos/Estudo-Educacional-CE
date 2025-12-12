@@ -56,8 +56,8 @@ nome_metrica = metricas_disponiveis[metrica_selecionada]
 
 # --- CÁLCULOS GERAIS ---
 media_19 = df19[metrica_selecionada].mean()
-media_24 = df23[metrica_selecionada].mean()
-delta_absoluto = media_24 - media_19
+media_23 = df23[metrica_selecionada].mean()
+delta_absoluto = media_23 - media_19
 delta_percentual = delta_absoluto * 100
 
 if delta_absoluto > 0:
@@ -116,7 +116,7 @@ with st.container(border=True):
     # --- COLUNA 2: 2024 ---
     with col2:
         st.subheader("2023 (Pós-Pandemia)")
-        st.metric(label="Média Estadual", value=f"{media_24:.2f}", delta=f"{delta_percentual:.1f} p.p.", delta_color=cor_delta)
+        st.metric(label="Média Estadual", value=f"{media_23:.2f}", delta=f"{delta_percentual:.1f} p.p.", delta_color=cor_delta)
     graf1, graf2 = st.columns(2)
     with graf1:
         fig1 = gerar_histograma(
@@ -162,12 +162,12 @@ with st.container(border=True):
     # --- EXTRAS: TABELA DE DADOS ---
     with st.expander("🔍 Ver Mais"):
         with st.expander("Ver Dados Detalhados por Município"):
-            df_merge = pd.merge(df19[['Municipio', metrica_selecionada, 'Total_Alunos']], df23[['Municipio', metrica_selecionada, 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge = pd.merge(df19[['Municipio', metrica_selecionada, 'Total_Alunos']], df23[['Municipio', metrica_selecionada, 'Total_Alunos']], on='Municipio', suffixes=('_19', '_23'))
             df_merge[f'{metrica_selecionada}_19'] = round((df_merge[f'{metrica_selecionada}_19']) * 1, 4)
-            df_merge[f'{metrica_selecionada}_24'] = round((df_merge[f'{metrica_selecionada}_24']) * 1, 4)
-            df_merge['Variação (p.p)'] = round((df_merge[f'{metrica_selecionada}_24'] - df_merge[f'{metrica_selecionada}_19']), 4) * 100.000
+            df_merge[f'{metrica_selecionada}_23'] = round((df_merge[f'{metrica_selecionada}_23']) * 1, 4)
+            df_merge['Variação (p.p)'] = round((df_merge[f'{metrica_selecionada}_23'] - df_merge[f'{metrica_selecionada}_19']), 4) * 100.000
             # df_merge[f'{metrica_selecionada}_19'] = ((df_merge[f'{metrica_selecionada}_19'])).map('{:.2f}%'.format)
-            # df_merge[f'{metrica_selecionada}_24'] = ((df_merge[f'{metrica_selecionada}_24'])).map('{:.2f}%'.format)
+            # df_merge[f'{metrica_selecionada}_23'] = ((df_merge[f'{metrica_selecionada}_23'])).map('{:.2f}%'.format)
             st.dataframe(df_merge.sort_values('Variação (p.p)', ascending=False))
         with st.expander("Municípios abaixo do percentil 25 em 2023"):
             p25 = np.percentile(df23[metrica_selecionada], 25)
@@ -253,9 +253,9 @@ with st.container(border=True):
             df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df23[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_23'))
             df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
             df_merge_enem['Nota_Media_Geral_23'] = round(df_merge_enem['Nota_Media_Geral_23'], 2)
-            df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_24'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
+            df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_23'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
             # df_merge_enem['Nota_Media_Geral_19'] = df_merge_enem['Nota_Media_Geral_19'].map('{:.2f}'.format)
-            # df_merge_enem['Nota_Media_Geral_24'] = df_merge_enem['Nota_Media_Geral_24'].map('{:.2f}'.format)
+            # df_merge_enem['Nota_Media_Geral_23'] = df_merge_enem['Nota_Media_Geral_23'].map('{:.2f}'.format)
             st.dataframe(df_merge_enem.sort_values('Variação (p.p)', ascending=False))
         with st.expander("Municípios abaixo do percentil 25 em 2023"):
             p25_enem = np.percentile(df23['Nota_Media_Geral'], 25)
@@ -349,7 +349,7 @@ with st.container(border=True):
         """
         st.write(texto_explicativo_corr)
         with st.expander("🔍 Ver Dados Detalhados por Município"):
-            df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df23[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df23[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_23'))
             df_merge_corr[f'{metrica_selecionada}_19'] = round((df_merge_corr[f'{metrica_selecionada}_19']) * 1, 4)
             df_merge_corr[f'{metrica_selecionada}_23'] = round((df_merge_corr[f'{metrica_selecionada}_23']) * 1, 4)
             st.dataframe(df_merge_corr)

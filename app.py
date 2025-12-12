@@ -7,7 +7,7 @@ from img import img_list
 from func import grafico_comparativo, gerar_histograma
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Educação Digital CE: 2019 vs 2024", layout="wide", page_icon="📊")
+st.set_page_config(page_title="Educação Digital CE: 2019 vs 2023", layout="wide", page_icon="📊")
 
 # --- CARREGAMENTO DE DADOS ---
 @st.cache_data
@@ -403,22 +403,18 @@ with st.container(border=True):
     ### Principais Descobertas
     
     #### 1. **Evolução das Taxas de Acesso Tecnológico**
-    - **Inclusão Digital Plena**: Caiu de aproximadamente 4 pontos percentuais, indicando uma geração "Mobile-Only" — alunos com acesso à internet via celular, mas sem computadores adequados para estudos avançados.
-    - **Posse de Computador**: Diminuiu drasticamente (queda de ~6 pontos percentuais), evidenciando o "Paradoxo da Conectividade": mais alunos, mas menos equipamentos de produtividade.
+    - **Taxa de Suporte Digital**: Caiu de aproximadamente ~9 pontos percentuais, indicando uma geração "Mobile-Only" — alunos com acesso à internet via celular, mas sem computadores adequados para estudos avançados.
+    - **Posse de Computador**: Diminuiu drasticamente (queda de ~10 pontos percentuais), evidenciando o "Paradoxo da Conectividade": mais alunos, mas menos equipamentos de produtividade.
     - **Acesso à Internet**: Universalizou-se, com aumento significativo (~20-30 pontos percentuais), tornando-se uma commodity essencial. A pandemia acelerou a infraestrutura de telecomunicações, rompendo barreiras de sinal em municípios remotos.
     
     #### 2. **Impacto no Desempenho Acadêmico (Nota Média do ENEM)**
-    - A nota média estadual subiu surpreendentemente (~2-3%), apesar da queda na inclusão digital plena. Isso sugere que fatores exógenos compensaram a falta de hardware tradicional.
-    - Correlação com Inclusão Digital: Forte em 2019 (~0.70), mas caiu em 2024 (~0.50), indicando que ter computador deixou de ser um diferencial competitivo.
-    - Correlação com Internet: Caiu drasticamente (de ~0.60 para ~0.30), pois o acesso se tornou ubíquo, não diferenciando mais alunos de alto desempenho.
-    - Correlação com Computador: Manteve-se robusta (~0.65-0.70), confirmando que equipamentos de produtividade ainda são cruciais para habilidades técnicas avançadas.
+    - A nota média estadual subiu (~3%), apesar da queda na inclusão digital plena. Isso sugere que fatores exógenos, além do aumento da conectividade compensaram a falta de hardware tradicional.
+    - Correlação com Suporte Digital: Forte em 2019 (~0.70), com um bom aumento em 2023 (~0.81), indicando que ter computador deixou de ser um diferencial competitivo.
+    - Correlação com Internet: Caiu drasticamente (de ~0.47 para ~0.16), pois o acesso se tornou ubíquo, não diferenciando mais alunos de alto desempenho.
+    - Correlação com Computador: Manteve-se robusta (~0.65-0.70), bem similar a correlação com a taxa de suporte digital, confirmando que equipamentos de produtividade ainda são cruciais para habilidades técnicas avançadas.
     
-    #### 3. **Análises Bivariadas e Distribuições**
-    - Os scatter plots mostram dispersão crescente em 2024, com municípios de baixa inclusão digital apresentando notas mais variadas.
-    - Histogramas e boxplots revelam concentração de notas entre 480-500, com maior variabilidade em 2024 devido à heterogeneidade regional.
-    - A mudança de "filtro social" (internet como barreira em 2019) para "filtro técnico" (computador como barreira em 2024) sinaliza uma nova era educacional.
     
-    #### 4. **Hipótese da IA Generativa e Tecnologias Emergentes**
+    #### 3. **Hipótese da IA Generativa e Tecnologias Emergentes**
     - A subida das notas, apesar da queda em computadores, aponta para o papel compensatório de IA generativa, celulares inteligentes e ferramentas online. Alunos de baixa renda podem estar usando esses recursos para nivelar o campo de jogo.
     - Recomendação: Políticas públicas devem focar em hardware (computadores/notebooks) para alunos de baixa renda, enquanto incentivam o uso ético de IA em redação e estudos.
     

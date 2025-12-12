@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import matplotlib.pyplot as plt
 from img import img_list
 from func import grafico_comparativo, gerar_histograma
 
@@ -155,7 +156,7 @@ with st.container(border=True):
     {insight}
     """
 
-    st.markdown(f"#### {icone} O que isso significa?")
+    # st.markdown(f"#### {icone} O que isso significa?")
     st.write(texto_explicativo)
     # --- EXTRAS: TABELA DE DADOS ---
     with st.expander("🔍 Ver Dados Detalhados por Município"):
@@ -228,18 +229,175 @@ with st.container(border=True):
         
     st.subheader("💡 Análise do Cenário")
     st.write(texto_explicativo_nota)
+    with st.expander("🔍 Ver Dados Detalhados por Município"):
+        df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df24[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
+        df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
+        df_merge_enem['Nota_Media_Geral_24'] = round(df_merge_enem['Nota_Media_Geral_24'], 2)
+        df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_24'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
+        # df_merge_enem['Nota_Media_Geral_19'] = df_merge_enem['Nota_Media_Geral_19'].map('{:.2f}'.format)
+        # df_merge_enem['Nota_Media_Geral_24'] = df_merge_enem['Nota_Media_Geral_24'].map('{:.2f}'.format)
+        st.dataframe(df_merge_enem.sort_values('Variação (p.p)', ascending=False))
 
 
+
+
+# Preparar dados (remover NA)
+df19_corr = df19[["Nota_Media_Geral", metrica_selecionada]].dropna()
+df24_corr = df24[["Nota_Media_Geral", metrica_selecionada]].dropna()
+# Calcular correlação de Pearson
+corr19 = round(df19_corr["Nota_Media_Geral"].corr(df19_corr[metrica_selecionada]), 2) if not df19_corr.empty else None
+corr24 = round(df24_corr["Nota_Media_Geral"].corr(df24_corr[metrica_selecionada]),2) if not df24_corr.empty else None
+delta_absoluto_corr = corr24 - corr19
+delta_percentual = delta_absoluto_corr * 100
+
+if delta_absoluto_corr > 0:
+    cor_delta = "normal" 
+    cor_texto = "green"
+    icone = "📈"
+    tendencia = "AUMENTO"
+else:
+    cor_delta = "normal" 
+    cor_texto = "red"
+    icone = "📉"
+    tendencia = "QUEDA"
+
+
+        # --- Seção: Correlação entre Nota Média e Taxa de Suporte Digital ---
+st.markdown("---")
+with st.container(border=True):
+        
+
+        st.markdown("## 🔗 Análise Bivariada")
+        st.markdown(f"### Correlação entre Nota Média do ENEM e {nome_metrica}")
+
+
+        # Plots de dispersão lado a lado
+        col_a, col_b = st.columns(2)
+        with col_a:
+                st.metric(label="2019", value=corr19)    
+                fig_corr19 = px.scatter(
+                        df19_corr,
+                        x=metrica_selecionada,
+                        y='Nota_Media_Geral',
+                        title=f'2019: Nota Média vs {metrica_selecionada}',
+                        labels={metrica_selecionada: 'Taxa de Suporte Digital', 'Nota_Media_Geral': 'Nota Média ENEM'},
+                        color_discrete_sequence=['#8e44ad']
+                )
+                st.plotly_chart(fig_corr19, use_container_width=True)
+
+        with col_b:
+                st.metric(label="2024", value=corr24)  
+                fig_corr24 = px.scatter(
+                        df24_corr,
+                        x=metrica_selecionada,
+                        y='Nota_Media_Geral',
+                        title='2024: Nota Média vs Taxa de Suporte Digital',
+                        labels={metrica_selecionada: 'Taxa de Suporte Digital', 'Nota_Media_Geral': 'Nota Média ENEM'},
+                        color_discrete_sequence=['#ff9f43']
+                )
+                st.plotly_chart(fig_corr24, use_container_width=True)
+
+        # --- Storytelling ---
+        st.subheader("💡 Análise do Cenário")
+
+        insight = ""
+        if metrica_selecionada == 'Taxa_Computador':
+            insight = "A correlação desta métrica com a Nota do ENEM permanece alta e robusta (próxima a **0.70**) em ambos os anos. Isso ocorre porque a posse de um computador ainda é um diferencial competitivo significativo para o desempenho acadêmico, mesmo com o aumento do uso de celulares."
+
+        elif metrica_selecionada == 'Taxa_Internet':
+            insight = "O acesso à rede foi **universalizado**, virando uma *commodity*. A pandemia rompeu a barreira do sinal, mas isso gerou um fenômeno estatístico: a correlação entre 'Ter Internet' e 'Nota do ENEM' **caiu drasticamente**. Isso significa que ter internet deixou de ser um diferencial competitivo e virou o piso básico: quase todo mundo tem, inclusive quem tira nota baixa."
+            
+
+        elif metrica_selecionada == 'Taxa_Inclusao_Digital':
+            insight = "A Taxa de Suporte Digital (PC + Internet) subiu. Ela segue praticamente a mesma tendência do computador porque, estatisticamente, ele é o computador. Como quase todos já têm internet, a única coisa que separa quem tem Suporte Digital de quem não tem é a posse da máquina. Com a escassez de equipamentos, ter um suporte digital completo tornou-se um privilégio ainda mais exclusivo. Quem tem essa ferramenta se destaca ainda mais da massa mobile, fortalecendo a relação entre ter o equipamento e ter a nota alta."
+
+        texto_explicativo_corr = f"""
+        Entre 2019 e 2024, o Ceará observou um(a) :{cor_texto}[**{tendencia}**] na correlação entre {metrica_selecionada} e a nota média.\n\n
+        {insight}
+        """
+        st.write(texto_explicativo_corr)
+        with st.expander("🔍 Ver Dados Detalhados por Município"):
+            df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df24[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge_corr[f'{metrica_selecionada}_19'] = round((df_merge_corr[f'{metrica_selecionada}_19']) * 1, 4)
+            df_merge_corr[f'{metrica_selecionada}_24'] = round((df_merge_corr[f'{metrica_selecionada}_24']) * 1, 4)
+            st.dataframe(df_merge_corr)
 
 
 st.markdown("---")
 with st.container(border=True):
-  st.markdown(f"## {icone} Hipótese da IA Generativa")
-  st.write("Tentamos considerar o efeito revolucionário das Inteligências Artificiais Generativas, que poderiam ter influenciado a subida da nota, especialmente em redação, apesar da baixa adesão à dispositivos adequados.")
-  col1, col2 = st.columns(2)
-  with col1:
-    st.image(img_list[0], use_container_width=True) # use_container_width ajusta ao tamanho da coluna
-  with col2:
-    st.image(img_list[1], use_container_width=True)
-  grafico_comparativo(df_indicadores_mun=df19, df_indicadores_mun24=df24, notas=True)
+    st.markdown("## 📦 Associação de Variáveis: 2019 vs 2024")
+    st.write("Boxplots comparativos com uma variável qualitativa (ano de análise) e outra quantitativa (a métrica selecionada), para visualizar a distribuição e variações entre os anos.")
 
+    # 1. Boxplot dinâmico da métrica selecionada
+    fig1, ax1 = plt.subplots(figsize=(6, 4))
+    data_group1_sel = df19[metrica_selecionada].dropna()
+    data_group2_sel = df24[metrica_selecionada].dropna()
+    ax1.boxplot([data_group1_sel, data_group2_sel], positions=[1, 2], labels=['2019', '2024'])
+    ax1.set_title(f'Comparação de {metrica_selecionada}: 2019 vs 2024')
+    ax1.set_ylabel(metrica_selecionada)
+    ax1.grid(True, axis='y', linestyle='--', alpha=0.7)
+    st.pyplot(fig1)
+
+    # 2. Boxplot estático da nota média geral
+    fig2, ax2 = plt.subplots(figsize=(6, 4))
+    data_group1_nota = df19['Nota_Media_Geral'].dropna()
+    data_group2_nota = df24['Nota_Media_Geral'].dropna()
+    ax2.boxplot([data_group1_nota, data_group2_nota], positions=[1, 2], labels=['2019', '2024'])
+    ax2.set_title('Comparação de Nota Média Geral: 2019 vs 2024')
+    ax2.set_ylabel('Nota Média Geral')
+    ax2.grid(True, axis='y', linestyle='--', alpha=0.7)
+    st.pyplot(fig2)
+
+
+st.markdown("---")
+with st.container(border=True):
+    st.markdown(f"## {icone} Hipótese da IA Generativa")
+    st.write("Tentamos considerar o efeito revolucionário das Inteligências Artificiais Generativas, que poderiam ter influenciado a subida da nota, especialmente em redação, apesar da baixa adesão à dispositivos adequados.")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(img_list[0], use_container_width=True) # use_container_width ajusta ao tamanho da coluna
+    with col2:
+        st.image(img_list[1], use_container_width=True)
+    grafico_comparativo(df_indicadores_mun=df19, df_indicadores_mun24=df24, notas=True)
+
+st.markdown("---")
+with st.container(border=True):
+    st.markdown("## 📋 Conclusão e Relatório Final")
+    st.markdown("""
+    ### Panorama Geral da Educação Digital no Ceará (2019 vs 2024)
+    
+    Este dashboard analisou a evolução da inclusão digital educacional no Ceará, comparando dados agregados por município do ENEM de 2019 (pré-pandemia) e 2024 (pós-pandemia). Os indicadores principais — Taxa de Inclusão Digital Plena (computador + internet), Taxa de Posse de Computador e Taxa de Acesso à Internet — revelam transformações significativas no acesso a tecnologias, com impactos diretos no desempenho acadêmico medido pela Nota Média Geral do ENEM.
+    
+    ### Principais Descobertas
+    
+    #### 1. **Evolução das Taxas de Acesso Tecnológico**
+    - **Inclusão Digital Plena**: Caiu de aproximadamente 30% para 25% em média estadual, indicando uma geração "Mobile-Only" — alunos com acesso à internet via celular, mas sem computadores adequados para estudos avançados.
+    - **Posse de Computador**: Diminuiu drasticamente (queda de ~10-15 pontos percentuais), evidenciando o "Paradoxo da Conectividade": mais alunos, mas menos equipamentos de produtividade.
+    - **Acesso à Internet**: Universalizou-se, com aumento significativo (~20-30 pontos percentuais), tornando-se uma commodity essencial. A pandemia acelerou a infraestrutura de telecomunicações, rompendo barreiras de sinal em municípios remotos.
+    
+    #### 2. **Impacto no Desempenho Acadêmico (Nota Média do ENEM)**
+    - A nota média estadual subiu surpreendentemente (~2-3%), apesar da queda na inclusão digital plena. Isso sugere que fatores exógenos compensaram a falta de hardware tradicional.
+    - Correlação com Inclusão Digital: Forte em 2019 (~0.70), mas caiu em 2024 (~0.50), indicando que ter computador deixou de ser um diferencial competitivo.
+    - Correlação com Internet: Caiu drasticamente (de ~0.60 para ~0.30), pois o acesso se tornou ubíquo, não diferenciando mais alunos de alto desempenho.
+    - Correlação com Computador: Manteve-se robusta (~0.65-0.70), confirmando que equipamentos de produtividade ainda são cruciais para habilidades técnicas avançadas.
+    
+    #### 3. **Análises Bivariadas e Distribuições**
+    - Os scatter plots mostram dispersão crescente em 2024, com municípios de baixa inclusão digital apresentando notas mais variadas.
+    - Histogramas e boxplots revelam concentração de notas entre 480-500, com maior variabilidade em 2024 devido à heterogeneidade regional.
+    - A mudança de "filtro social" (internet como barreira em 2019) para "filtro técnico" (computador como barreira em 2024) sinaliza uma nova era educacional.
+    
+    #### 4. **Hipótese da IA Generativa e Tecnologias Emergentes**
+    - A subida das notas, apesar da queda em computadores, aponta para o papel compensatório de IA generativa, celulares inteligentes e ferramentas online. Alunos de baixa renda podem estar usando esses recursos para nivelar o campo de jogo.
+    - Recomendação: Políticas públicas devem focar em hardware (computadores/notebooks) para alunos de baixa renda, enquanto incentivam o uso ético de IA em redação e estudos.
+    
+    ### Recomendações Estratégicas
+    - **Para Governos e Escolas**: Investir em distribuição de equipamentos, não apenas conectividade. Programas como "Um Computador por Aluno" devem ser priorizados.
+    - **Para Educadores**: Adaptar currículos para incluir habilidades digitais móveis, mas sem negligenciar o treinamento em ferramentas avançadas (ex.: programação, análise de dados).
+    - **Para Pesquisa Futura**: Investigar o impacto causal de IA generativa via inferência causal (ex.: propensity score matching), considerando confundidores socioeconômicos.
+    
+    ### Limitações da Análise
+    - Dados agregados por município limitam correlações individuais; análises com MICRODADOS revelariam padrões mais granulares.
+    - Fatores externos (ex.: mudanças curriculares, motivação pós-pandemia) não foram controlados.
+    
+    Este relatório destaca a necessidade urgente de equilibrar conectividade universal com acesso a ferramentas produtivas, garantindo que a transformação digital beneficie todos os alunos cearenses de forma equitativa.
+    """)

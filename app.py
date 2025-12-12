@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
+import numpy as np
 from img import img_list
 from func import grafico_comparativo, gerar_histograma
 
@@ -13,23 +14,23 @@ st.set_page_config(page_title="Educação Digital CE: 2019 vs 2024", layout="wid
 def load_data():
     df19 = pd.read_csv('indicadores19.csv')
     df24 = pd.read_csv('indicadores24.csv')
-    
+    df23 = pd.read_csv('indicadores23.csv')    
 
     df19 = df19.rename(columns={
         'NO_MUNICIPIO_PROVA': 'Municipio', 
         'Computador': 'Total_Computador', 
         'Internet': 'Total_Internet'
     })
-    df24 = df24.rename(columns={
+    df23 = df23.rename(columns={
         'NO_MUNICIPIO_PROVA': 'Municipio', 
         'Computador': 'Total_Computador', 
         'Internet': 'Total_Internet'
     })
     
-    return df19, df24
+    return df19, df23, df24
 
 try:
-    df19, df24 = load_data()
+    df19, df23, df24 = load_data()
 except FileNotFoundError:
     st.error("⚠️ Arquivos 'indicadores19.csv' ou 'indicadores24.csv' não encontrados na pasta.")
     st.stop()
@@ -55,7 +56,7 @@ nome_metrica = metricas_disponiveis[metrica_selecionada]
 
 # --- CÁLCULOS GERAIS ---
 media_19 = df19[metrica_selecionada].mean()
-media_24 = df24[metrica_selecionada].mean()
+media_24 = df23[metrica_selecionada].mean()
 delta_absoluto = media_24 - media_19
 delta_percentual = delta_absoluto * 100
 
@@ -114,7 +115,7 @@ with st.container(border=True):
 
     # --- COLUNA 2: 2024 ---
     with col2:
-        st.subheader("2024 (Pós-Pandemia)")
+        st.subheader("2023 (Pós-Pandemia)")
         st.metric(label="Média Estadual", value=f"{media_24:.2f}", delta=f"{delta_percentual:.1f} p.p.", delta_color=cor_delta)
     graf1, graf2 = st.columns(2)
     with graf1:
@@ -122,7 +123,7 @@ with st.container(border=True):
         df=df19,
         coluna=metrica_selecionada,
         cor='#8e44ad', # roxo
-        titulo="Distribuição dos Municípios (2019)",
+        titulo="Distribuição dos Municípios (2023)",
         x_label=nome_metrica,
         is_nota=False
     )
@@ -130,10 +131,10 @@ with st.container(border=True):
     
     with graf2:
         fig2 = gerar_histograma(
-            df=df24,
+            df=df23,
             coluna=metrica_selecionada,
             cor='#ff9f43', # laranja
-            titulo="Distribuição dos Municípios (2024)",
+            titulo="Distribuição dos Municípios (2023)",
             x_label=nome_metrica,
             is_nota=False
         )
@@ -152,27 +153,45 @@ with st.container(border=True):
         insight = "A Inclusão Plena (ter as duas coisas) caiu. Estamos criando uma geração **'Mobile-Only'**, o que pode limitar o desenvolvimento de habilidades técnicas avançadas."
 
     texto_explicativo = f"""
-    Entre 2019 e 2024, o Ceará observou um(a) :{cor_texto}[**{tendencia}**] de **{abs(delta_percentual):.1f} pontos percentuais** neste indicador.
+    Entre 2019 e 2023, o Ceará observou um(a) :{cor_texto}[**{tendencia}**] de **{abs(delta_percentual):.1f} pontos percentuais** neste indicador.
     {insight}
     """
 
     # st.markdown(f"#### {icone} O que isso significa?")
     st.write(texto_explicativo)
     # --- EXTRAS: TABELA DE DADOS ---
-    with st.expander("🔍 Ver Dados Detalhados por Município"):
-        df_merge = pd.merge(df19[['Municipio', metrica_selecionada, 'Total_Alunos']], df24[['Municipio', metrica_selecionada, 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
-        df_merge[f'{metrica_selecionada}_19'] = round((df_merge[f'{metrica_selecionada}_19']) * 1, 4)
-        df_merge[f'{metrica_selecionada}_24'] = round((df_merge[f'{metrica_selecionada}_24']) * 1, 4)
-        df_merge['Variação (p.p)'] = round((df_merge[f'{metrica_selecionada}_24'] - df_merge[f'{metrica_selecionada}_19']), 4) * 100.000
-        # df_merge[f'{metrica_selecionada}_19'] = ((df_merge[f'{metrica_selecionada}_19'])).map('{:.2f}%'.format)
-        # df_merge[f'{metrica_selecionada}_24'] = ((df_merge[f'{metrica_selecionada}_24'])).map('{:.2f}%'.format)
-        st.dataframe(df_merge.sort_values('Variação (p.p)', ascending=False))
+    with st.expander("🔍 Ver Mais"):
+        with st.expander("Ver Dados Detalhados por Município"):
+            df_merge = pd.merge(df19[['Municipio', metrica_selecionada, 'Total_Alunos']], df23[['Municipio', metrica_selecionada, 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge[f'{metrica_selecionada}_19'] = round((df_merge[f'{metrica_selecionada}_19']) * 1, 4)
+            df_merge[f'{metrica_selecionada}_24'] = round((df_merge[f'{metrica_selecionada}_24']) * 1, 4)
+            df_merge['Variação (p.p)'] = round((df_merge[f'{metrica_selecionada}_24'] - df_merge[f'{metrica_selecionada}_19']), 4) * 100.000
+            # df_merge[f'{metrica_selecionada}_19'] = ((df_merge[f'{metrica_selecionada}_19'])).map('{:.2f}%'.format)
+            # df_merge[f'{metrica_selecionada}_24'] = ((df_merge[f'{metrica_selecionada}_24'])).map('{:.2f}%'.format)
+            st.dataframe(df_merge.sort_values('Variação (p.p)', ascending=False))
+        with st.expander("Municípios abaixo do percentil 25 em 2023"):
+            p25 = np.percentile(df23[metrica_selecionada], 25)
+            df_baixo = df23[df23[metrica_selecionada] <= p25]
+            df_baixo = df_baixo[['Municipio', metrica_selecionada, 'Total_Alunos']]
+            df_baixo[metrica_selecionada] = round((df_baixo[metrica_selecionada]) * 1, 4)
+            st.dataframe(df_baixo.sort_values(metrica_selecionada))
+        with st.expander("Municípios acima do percentil 75 em 2023"):
+            p75 = np.percentile(df23[metrica_selecionada], 75)
+            df_alto = df23[df23[metrica_selecionada] >= p75]
+            df_alto = df_alto[['Municipio', metrica_selecionada, 'Total_Alunos']]
+            df_alto[metrica_selecionada] = round((df_alto[metrica_selecionada]) * 1, 4)
+            st.dataframe(df_alto.sort_values(metrica_selecionada, ascending=False))
+
+        
 
 
-## COMPARATIVO ENEM 2019 X 2024
+## COMPARATIVO ENEM 2019 X 2023
+alunos19 = pd.read_csv('alunos19.csv')
+alunos23 = pd.read_csv('alunos23.csv')  
+
 with st.container(border=True):
-    nota_media19 = df19['Nota_Media_Geral'].mean()
-    nota_media24 = df24['Nota_Media_Geral'].mean()
+    nota_media19 = alunos19['Nota_Media_Geral'].mean()
+    nota_media24 = alunos23['Nota_Media_Geral'].mean()
     delta_enem = ((nota_media24- nota_media19) / nota_media19) * 100
     if delta_enem > 0:
         cor_delta_enem = "normal" 
@@ -184,9 +203,9 @@ with st.container(border=True):
         cor_texto_enem = "red"
         icone_enem = "📉"
         tendencia_enem = "RETROCESSO"
-    insight_enem = "Surpreendentemente, **o desempenho subiu** mesmo com a queda dos computadores. Hipótese provável: o uso de **IA Generativa e Celulares** compensou a falta de hardware físico."
+    insight_enem = "Surpreendentemente, **o desempenho subiu** mesmo com a queda dos computadores. Hipótese provável: o uso de **IA Generativa e Celulares** compensou a falta de hardware físico. \n\nA universalização da internet atuou como uma rede de segurança, garantindo um aumento na nota média através da inclusão massiva. No entanto, trocamos um crescimento potencial de alta eficiência (via computadores) por um crescimento de volume (via mobile), o que sugere que estamos operando abaixo do nosso potencial máximo"
     texto_explicativo_nota= f"""
-    Entre 2019 e 2024, o Ceará observou um(a) :{cor_texto_enem}[**{tendencia_enem}**] de **{abs(delta_enem):.1f} %** neste indicador.
+    Entre 2019 e 2023, o Ceará observou um(a) :{cor_texto_enem}[**{tendencia_enem}**] de **{abs(delta_enem):.1f} %** neste indicador.
     {insight_enem}
     """
 
@@ -200,7 +219,7 @@ with st.container(border=True):
 
 
     with col22:
-        st.subheader("2024 (Pós-Pandemia)")
+        st.subheader("2023 (Pós-Pandemia)")
         st.metric(label="Média Estadual da Nota do ENEM", value=f"{nota_media24:.2f}", delta=f"{delta_enem:.1f}%", delta_color=cor_delta_enem)
     
     graf_enem1, graf_enem2 = st.columns(2)
@@ -217,7 +236,7 @@ with st.container(border=True):
     
     with graf_enem2:
         fig2_enem = gerar_histograma(
-            df=df24,
+            df=df23,
             coluna='Nota_Media_Geral' ,
             cor='#ff9f43', # laranja
             titulo="Distribuição dos Municípios (2019)",
@@ -229,24 +248,37 @@ with st.container(border=True):
         
     st.subheader("💡 Análise do Cenário")
     st.write(texto_explicativo_nota)
-    with st.expander("🔍 Ver Dados Detalhados por Município"):
-        df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df24[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
-        df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
-        df_merge_enem['Nota_Media_Geral_24'] = round(df_merge_enem['Nota_Media_Geral_24'], 2)
-        df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_24'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
-        # df_merge_enem['Nota_Media_Geral_19'] = df_merge_enem['Nota_Media_Geral_19'].map('{:.2f}'.format)
-        # df_merge_enem['Nota_Media_Geral_24'] = df_merge_enem['Nota_Media_Geral_24'].map('{:.2f}'.format)
-        st.dataframe(df_merge_enem.sort_values('Variação (p.p)', ascending=False))
+    with st.expander("🔍 Ver Mais"):
+        with st.expander("Ver Dados Detalhados por Município"):
+            df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df23[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
+            df_merge_enem['Nota_Media_Geral_24'] = round(df_merge_enem['Nota_Media_Geral_24'], 2)
+            df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_24'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
+            # df_merge_enem['Nota_Media_Geral_19'] = df_merge_enem['Nota_Media_Geral_19'].map('{:.2f}'.format)
+            # df_merge_enem['Nota_Media_Geral_24'] = df_merge_enem['Nota_Media_Geral_24'].map('{:.2f}'.format)
+            st.dataframe(df_merge_enem.sort_values('Variação (p.p)', ascending=False))
+        with st.expander("Municípios abaixo do percentil 25 em 2023"):
+            p25_enem = np.percentile(df23['Nota_Media_Geral'], 25)
+            df_baixo_enem = df23[df23['Nota_Media_Geral'] <= p25_enem]
+            df_baixo_enem = df_baixo_enem[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']]
+            df_baixo_enem['Nota_Media_Geral'] = round(df_baixo_enem['Nota_Media_Geral'], 2)
+            st.dataframe(df_baixo_enem.sort_values('Nota_Media_Geral'))
+        with st.expander("Municípios acima do percentil 75 em 2023"):
+            p75_enem = np.percentile(df23['Nota_Media_Geral'], 75)
+            df_alto_enem = df23[df23['Nota_Media_Geral'] >= p75_enem]
+            df_alto_enem = df_alto_enem[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']]
+            df_alto_enem['Nota_Media_Geral'] = round(df_alto_enem['Nota_Media_Geral'], 2)
+            st.dataframe(df_alto_enem.sort_values('Nota_Media_Geral', ascending=False))
 
 
 
 
 # Preparar dados (remover NA)
 df19_corr = df19[["Nota_Media_Geral", metrica_selecionada]].dropna()
-df24_corr = df24[["Nota_Media_Geral", metrica_selecionada]].dropna()
+df23_corr = df23[["Nota_Media_Geral", metrica_selecionada]].dropna()
 # Calcular correlação de Pearson
 corr19 = round(df19_corr["Nota_Media_Geral"].corr(df19_corr[metrica_selecionada]), 2) if not df19_corr.empty else None
-corr24 = round(df24_corr["Nota_Media_Geral"].corr(df24_corr[metrica_selecionada]),2) if not df24_corr.empty else None
+corr24 = round(df23_corr["Nota_Media_Geral"].corr(df23_corr[metrica_selecionada]),2) if not df23_corr.empty else None
 delta_absoluto_corr = corr24 - corr19
 delta_percentual = delta_absoluto_corr * 100
 
@@ -286,12 +318,12 @@ with st.container(border=True):
                 st.plotly_chart(fig_corr19, use_container_width=True)
 
         with col_b:
-                st.metric(label="2024", value=corr24)  
+                st.metric(label="2023", value=corr24)  
                 fig_corr24 = px.scatter(
-                        df24_corr,
+                        df23_corr,
                         x=metrica_selecionada,
                         y='Nota_Media_Geral',
-                        title='2024: Nota Média vs Taxa de Suporte Digital',
+                        title='2023: Nota Média vs Taxa de Suporte Digital',
                         labels={metrica_selecionada: 'Taxa de Suporte Digital', 'Nota_Media_Geral': 'Nota Média ENEM'},
                         color_discrete_sequence=['#ff9f43']
                 )
@@ -312,12 +344,12 @@ with st.container(border=True):
             insight = "A Taxa de Suporte Digital (PC + Internet) subiu. Ela segue praticamente a mesma tendência do computador porque, estatisticamente, ele é o computador. Como quase todos já têm internet, a única coisa que separa quem tem Suporte Digital de quem não tem é a posse da máquina. Com a escassez de equipamentos, ter um suporte digital completo tornou-se um privilégio ainda mais exclusivo. Quem tem essa ferramenta se destaca ainda mais da massa mobile, fortalecendo a relação entre ter o equipamento e ter a nota alta."
 
         texto_explicativo_corr = f"""
-        Entre 2019 e 2024, o Ceará observou um(a) :{cor_texto}[**{tendencia}**] na correlação entre {metrica_selecionada} e a nota média.\n\n
+        Entre 2019 e 2023, o Ceará observou um(a) :{cor_texto}[**{tendencia}**] na correlação entre {metrica_selecionada} e a nota média.\n\n
         {insight}
         """
         st.write(texto_explicativo_corr)
         with st.expander("🔍 Ver Dados Detalhados por Município"):
-            df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df24[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df23[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_24'))
             df_merge_corr[f'{metrica_selecionada}_19'] = round((df_merge_corr[f'{metrica_selecionada}_19']) * 1, 4)
             df_merge_corr[f'{metrica_selecionada}_24'] = round((df_merge_corr[f'{metrica_selecionada}_24']) * 1, 4)
             st.dataframe(df_merge_corr)
@@ -325,15 +357,15 @@ with st.container(border=True):
 
 st.markdown("---")
 with st.container(border=True):
-    st.markdown("## 📦 Associação de Variáveis: 2019 vs 2024")
+    st.markdown("## 📦 Associação de Variáveis: 2019 vs 2023")
     st.write("Boxplots comparativos com uma variável qualitativa (ano de análise) e outra quantitativa (a métrica selecionada), para visualizar a distribuição e variações entre os anos.")
 
     # 1. Boxplot dinâmico da métrica selecionada
     fig1, ax1 = plt.subplots(figsize=(6, 4))
     data_group1_sel = df19[metrica_selecionada].dropna()
-    data_group2_sel = df24[metrica_selecionada].dropna()
-    ax1.boxplot([data_group1_sel, data_group2_sel], positions=[1, 2], labels=['2019', '2024'])
-    ax1.set_title(f'Comparação de {metrica_selecionada}: 2019 vs 2024')
+    data_group2_sel = df23[metrica_selecionada].dropna()
+    ax1.boxplot([data_group1_sel, data_group2_sel], positions=[1, 2], labels=['2019', '2023'])
+    ax1.set_title(f'Comparação de {metrica_selecionada}: 2019 vs 2023')
     ax1.set_ylabel(metrica_selecionada)
     ax1.grid(True, axis='y', linestyle='--', alpha=0.7)
     st.pyplot(fig1)
@@ -342,8 +374,8 @@ with st.container(border=True):
     fig2, ax2 = plt.subplots(figsize=(6, 4))
     data_group1_nota = df19['Nota_Media_Geral'].dropna()
     data_group2_nota = df24['Nota_Media_Geral'].dropna()
-    ax2.boxplot([data_group1_nota, data_group2_nota], positions=[1, 2], labels=['2019', '2024'])
-    ax2.set_title('Comparação de Nota Média Geral: 2019 vs 2024')
+    ax2.boxplot([data_group1_nota, data_group2_nota], positions=[1, 2], labels=['2019', '2023'])
+    ax2.set_title('Comparação de Nota Média Geral: 2019 vs 2023')
     ax2.set_ylabel('Nota Média Geral')
     ax2.grid(True, axis='y', linestyle='--', alpha=0.7)
     st.pyplot(fig2)
@@ -364,15 +396,15 @@ st.markdown("---")
 with st.container(border=True):
     st.markdown("## 📋 Conclusão e Relatório Final")
     st.markdown("""
-    ### Panorama Geral da Educação Digital no Ceará (2019 vs 2024)
+    ### Panorama Geral da Educação Digital no Ceará (2019 vs 2023)
     
     Este dashboard analisou a evolução da inclusão digital educacional no Ceará, comparando dados agregados por município do ENEM de 2019 (pré-pandemia) e 2024 (pós-pandemia). Os indicadores principais — Taxa de Inclusão Digital Plena (computador + internet), Taxa de Posse de Computador e Taxa de Acesso à Internet — revelam transformações significativas no acesso a tecnologias, com impactos diretos no desempenho acadêmico medido pela Nota Média Geral do ENEM.
     
     ### Principais Descobertas
     
     #### 1. **Evolução das Taxas de Acesso Tecnológico**
-    - **Inclusão Digital Plena**: Caiu de aproximadamente 30% para 25% em média estadual, indicando uma geração "Mobile-Only" — alunos com acesso à internet via celular, mas sem computadores adequados para estudos avançados.
-    - **Posse de Computador**: Diminuiu drasticamente (queda de ~10-15 pontos percentuais), evidenciando o "Paradoxo da Conectividade": mais alunos, mas menos equipamentos de produtividade.
+    - **Inclusão Digital Plena**: Caiu de aproximadamente 4 pontos percentuais, indicando uma geração "Mobile-Only" — alunos com acesso à internet via celular, mas sem computadores adequados para estudos avançados.
+    - **Posse de Computador**: Diminuiu drasticamente (queda de ~6 pontos percentuais), evidenciando o "Paradoxo da Conectividade": mais alunos, mas menos equipamentos de produtividade.
     - **Acesso à Internet**: Universalizou-se, com aumento significativo (~20-30 pontos percentuais), tornando-se uma commodity essencial. A pandemia acelerou a infraestrutura de telecomunicações, rompendo barreiras de sinal em municípios remotos.
     
     #### 2. **Impacto no Desempenho Acadêmico (Nota Média do ENEM)**

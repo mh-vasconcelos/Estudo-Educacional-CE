@@ -250,7 +250,7 @@ with st.container(border=True):
     st.write(texto_explicativo_nota)
     with st.expander("🔍 Ver Mais"):
         with st.expander("Ver Dados Detalhados por Município"):
-            df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df23[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_24'))
+            df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df23[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_23'))
             df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
             df_merge_enem['Nota_Media_Geral_23'] = round(df_merge_enem['Nota_Media_Geral_23'], 2)
             df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_24'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)

@@ -190,8 +190,8 @@ alunos19 = pd.read_csv('alunos19.csv')
 alunos23 = pd.read_csv('alunos23.csv')  
 
 with st.container(border=True):
-    nota_media19 = alunos19['Nota_Media_Geral'].mean()
-    nota_media24 = alunos23['Nota_Media_Geral'].mean()
+    nota_media19 = alunos19['media'].mean()
+    nota_media24 = alunos23['media'].mean()
     delta_enem = ((nota_media24- nota_media19) / nota_media19) * 100
     if delta_enem > 0:
         cor_delta_enem = "normal" 

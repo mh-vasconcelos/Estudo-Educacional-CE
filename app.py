@@ -191,8 +191,8 @@ with st.container(border=True):
 
 
 ## COMPARATIVO ENEM 2019 X 2023
-alunos19 = pd.read_csv('alunos19.csv')
-alunos23 = pd.read_csv('alunos23.csv')  
+# alunos19 = pd.read_csv('alunos19.csv')
+# alunos23 = pd.read_csv('alunos23.csv')  
 
 with st.container(border=True):
     # nota_media19 = alunos19['media'].mean()

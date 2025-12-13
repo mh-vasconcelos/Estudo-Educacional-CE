@@ -390,7 +390,7 @@ with st.container(border=True):
             st.pyplot(fig2)
     with st.container(border=True):
         st.markdown("### Gráfico Comparativo: Alta Estrutura X Baixa Estrutura")
-        st.markdown("#### 📦 Estagnação na Educação em 2023 foi perceptível")
+        st.markdown("#### 🛑 Estagnação na Educação em 2023 foi perceptível")
         img1, img2 = st.columns(2)
         with img1:
             st.image(img_ideb)
@@ -474,7 +474,7 @@ with st.container(border=True):
         st.write("O IDEB perdeu parte de sua capacidade de representar o aprendizado real no cenário pós-pandemia.\nIsso ocorre, em partes, porque houve um mascaramento dos efeitos reais da pandemia nas avaliações internas.")
  
     with st.container(border=True):
-        st.markdown("### 📊 Ocupação do pai do aluno")
+        st.markdown("### 👨‍👦 Ocupação do pai do aluno")
         st.markdown("#### 📦 A Inclusão Digital teve um impacto significativo no desempenho dos alunos")
         st.write("A análise foi realizada buscando entender de que forma a ocupação dos pais, enquanto indicador socioeconômico, se relaciona com o desempenho médio educacional das cidades. O boxplot foi escolhido não apenas para comparar as medianas, mas também analisar a dispersão dos dados e a presença de outliers (cidades que fujam do padrão).")
         img1, img2 = st.columns(2)

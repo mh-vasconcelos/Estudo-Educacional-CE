@@ -13,12 +13,12 @@ def load_data():
     
 
     df19 = df19.rename(columns={
-        'NO_MUNICIPIO_RESIDENCIA': 'Municipio', 
+        'NO_MUNICIPIO_RESIDENCIA': 'MUNICIPIO', 
         'Computador': 'Total_Computador', 
         'Internet': 'Total_Internet'
     })
     df24 = df24.rename(columns={
-        'NO_MUNICIPIO_PROVA': 'Municipio', 
+        'NO_MUNICIPIO_PROVA': 'MUNICIPIO', 
         'Computador': 'Total_Computador', 
         'Internet': 'Total_Internet'
     })
@@ -27,9 +27,9 @@ def load_data():
 
 def grafico_comparativo(df_indicadores_mun, df_indicadores_mun24, notas = False):
   df_final = pd.merge(
-    df_indicadores_mun[['Municipio', 'Taxa_Inclusao_Digital', 'Taxa_Computador', 'Taxa_Internet', 'Nota_Media_Geral', 'Nota_Redacao','Nota_CH', 'Nota_Mat', 'Nota_CN', 'Nota_LC', 'Total_Alunos']],
-    df_indicadores_mun24[['Municipio', 'Taxa_Inclusao_Digital', 'Taxa_Computador', 'Taxa_Internet', 'Nota_Media_Geral', 'Nota_Redacao','Nota_CH', 'Nota_Mat', 'Nota_CN', 'Nota_LC','Total_Alunos']],
-    on='Municipio',
+    df_indicadores_mun[['MUNICIPIO', 'Taxa_Inclusao_Digital', 'Taxa_Computador', 'Taxa_Internet', 'Nota_Media_Geral', 'Nota_Redacao','Nota_CH', 'Nota_Mat', 'Nota_CN', 'Nota_LC', 'Total_Alunos']],
+    df_indicadores_mun24[['MUNICIPIO', 'Taxa_Inclusao_Digital', 'Taxa_Computador', 'Taxa_Internet', 'Nota_Media_Geral', 'Nota_Redacao','Nota_CH', 'Nota_Mat', 'Nota_CN', 'Nota_LC','Total_Alunos']],
+    on='MUNICIPIO',
     suffixes=('_2019', '_2024'))
   
   # condicionar flag notas

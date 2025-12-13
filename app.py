@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
-from img import img_list
+from img import img_list, img_box, img_ideb, img_ideb_ce, mapa_taxa
 from func import grafico_comparativo, gerar_histograma
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
@@ -17,12 +17,12 @@ def load_data():
     df23 = pd.read_csv('indicadores23.csv')    
 
     df19 = df19.rename(columns={
-        'NO_MUNICIPIO_PROVA': 'Municipio', 
+        'NO_MUNICIPIO_PROVA': 'MUNICIPIO', 
         'Computador': 'Total_Computador', 
         'Internet': 'Total_Internet'
     })
     df23 = df23.rename(columns={
-        'NO_MUNICIPIO_PROVA': 'Municipio', 
+        'NO_MUNICIPIO_PROVA': 'MUNICIPIO', 
         'Computador': 'Total_Computador', 
         'Internet': 'Total_Internet'
     })
@@ -101,6 +101,12 @@ with st.container(border=True):
         '* **Total de Alunos:** O número total de estudantes por município (ou total, caso agreguemos para o estado)'
     )
 
+with st.container(border=True):
+    st.markdown(f'### Mapa de calor da Taxa de Suporte Digital ao Estudo no Ceará (2023)')
+    col1, col2, col3 = st.columns([1, 6, 1])
+    with col2:
+        st.image(mapa_taxa, use_container_width=True)
+
 # st.markdown("---")
 # --- Comparativo ---
 with st.container(border=True):
@@ -162,7 +168,7 @@ with st.container(border=True):
     # --- EXTRAS: TABELA DE DADOS ---
     with st.expander("🔍 Ver Mais"):
         with st.expander("Ver Dados Detalhados por Município"):
-            df_merge = pd.merge(df19[['Municipio', metrica_selecionada, 'Total_Alunos']], df23[['Municipio', metrica_selecionada, 'Total_Alunos']], on='Municipio', suffixes=('_19', '_23'))
+            df_merge = pd.merge(df19[['MUNICIPIO', metrica_selecionada, 'Total_Alunos']], df23[['MUNICIPIO', metrica_selecionada, 'Total_Alunos']], on='MUNICIPIO', suffixes=('_19', '_23'))
             df_merge[f'{metrica_selecionada}_19'] = round((df_merge[f'{metrica_selecionada}_19']) * 1, 4)
             df_merge[f'{metrica_selecionada}_23'] = round((df_merge[f'{metrica_selecionada}_23']) * 1, 4)
             df_merge['Variação (p.p)'] = round((df_merge[f'{metrica_selecionada}_23'] - df_merge[f'{metrica_selecionada}_19']), 4) * 100.000
@@ -172,13 +178,13 @@ with st.container(border=True):
         with st.expander("Municípios abaixo do percentil 25 em 2023"):
             p25 = np.percentile(df23[metrica_selecionada], 25)
             df_baixo = df23[df23[metrica_selecionada] <= p25]
-            df_baixo = df_baixo[['Municipio', metrica_selecionada, 'Total_Alunos']]
+            df_baixo = df_baixo[['MUNICIPIO', metrica_selecionada, 'Total_Alunos']]
             df_baixo[metrica_selecionada] = round((df_baixo[metrica_selecionada]) * 1, 4)
             st.dataframe(df_baixo.sort_values(metrica_selecionada))
         with st.expander("Municípios acima do percentil 75 em 2023"):
             p75 = np.percentile(df23[metrica_selecionada], 75)
             df_alto = df23[df23[metrica_selecionada] >= p75]
-            df_alto = df_alto[['Municipio', metrica_selecionada, 'Total_Alunos']]
+            df_alto = df_alto[['MUNICIPIO', metrica_selecionada, 'Total_Alunos']]
             df_alto[metrica_selecionada] = round((df_alto[metrica_selecionada]) * 1, 4)
             st.dataframe(df_alto.sort_values(metrica_selecionada, ascending=False))
 
@@ -190,8 +196,10 @@ alunos19 = pd.read_csv('alunos19.csv')
 alunos23 = pd.read_csv('alunos23.csv')  
 
 with st.container(border=True):
-    nota_media19 = alunos19['media'].mean()
-    nota_media24 = alunos23['media'].mean()
+    # nota_media19 = alunos19['media'].mean()
+    # nota_media24 = alunos23['media'].mean()
+    nota_media19 = df19['Nota_Media_Geral'].dropna().mean()
+    nota_media24 = df23['Nota_Media_Geral'].dropna().mean()
     delta_enem = ((nota_media24- nota_media19) / nota_media19) * 100
     if delta_enem > 0:
         cor_delta_enem = "normal" 
@@ -250,7 +258,7 @@ with st.container(border=True):
     st.write(texto_explicativo_nota)
     with st.expander("🔍 Ver Mais"):
         with st.expander("Ver Dados Detalhados por Município"):
-            df_merge_enem = pd.merge(df19[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], df23[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']], on='Municipio', suffixes=('_19', '_23'))
+            df_merge_enem = pd.merge(df19[['MUNICIPIO', 'Nota_Media_Geral', 'Total_Alunos']], df23[['MUNICIPIO', 'Nota_Media_Geral', 'Total_Alunos']], on='MUNICIPIO', suffixes=('_19', '_23'))
             df_merge_enem['Nota_Media_Geral_19'] = round(df_merge_enem['Nota_Media_Geral_19'], 2)
             df_merge_enem['Nota_Media_Geral_23'] = round(df_merge_enem['Nota_Media_Geral_23'], 2)
             df_merge_enem['Variação (p.p)'] = round((df_merge_enem['Nota_Media_Geral_23'] - df_merge_enem['Nota_Media_Geral_19']) / df_merge_enem['Nota_Media_Geral_19'] * 100, 2)
@@ -260,13 +268,13 @@ with st.container(border=True):
         with st.expander("Municípios abaixo do percentil 25 em 2023"):
             p25_enem = np.percentile(df23['Nota_Media_Geral'], 25)
             df_baixo_enem = df23[df23['Nota_Media_Geral'] <= p25_enem]
-            df_baixo_enem = df_baixo_enem[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']]
+            df_baixo_enem = df_baixo_enem[['MUNICIPIO', 'Nota_Media_Geral', 'Total_Alunos']]
             df_baixo_enem['Nota_Media_Geral'] = round(df_baixo_enem['Nota_Media_Geral'], 2)
             st.dataframe(df_baixo_enem.sort_values('Nota_Media_Geral'))
         with st.expander("Municípios acima do percentil 75 em 2023"):
             p75_enem = np.percentile(df23['Nota_Media_Geral'], 75)
             df_alto_enem = df23[df23['Nota_Media_Geral'] >= p75_enem]
-            df_alto_enem = df_alto_enem[['Municipio', 'Nota_Media_Geral', 'Total_Alunos']]
+            df_alto_enem = df_alto_enem[['MUNICIPIO', 'Nota_Media_Geral', 'Total_Alunos']]
             df_alto_enem['Nota_Media_Geral'] = round(df_alto_enem['Nota_Media_Geral'], 2)
             st.dataframe(df_alto_enem.sort_values('Nota_Media_Geral', ascending=False))
 
@@ -297,12 +305,10 @@ else:
         # --- Seção: Correlação entre Nota Média e Taxa de Suporte Digital ---
 st.markdown("---")
 with st.container(border=True):
+    st.markdown("# 🔗 Análise Bivariada")
         
-
-        st.markdown("## 🔗 Análise Bivariada")
+    with st.container(border=True):
         st.markdown(f"### Correlação entre Nota Média do ENEM e {nome_metrica}")
-
-
         # Plots de dispersão lado a lado
         col_a, col_b = st.columns(2)
         with col_a:
@@ -349,36 +355,130 @@ with st.container(border=True):
         """
         st.write(texto_explicativo_corr)
         with st.expander("🔍 Ver Dados Detalhados por Município"):
-            df_merge_corr = pd.merge(df19[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], df23[['Municipio', metrica_selecionada, 'Nota_Media_Geral']], on='Municipio', suffixes=('_19', '_23'))
+            df_merge_corr = pd.merge(df19[['MUNICIPIO', metrica_selecionada, 'Nota_Media_Geral']], df23[['MUNICIPIO', metrica_selecionada, 'Nota_Media_Geral']], on='MUNICIPIO', suffixes=('_19', '_23'))
             df_merge_corr[f'{metrica_selecionada}_19'] = round((df_merge_corr[f'{metrica_selecionada}_19']) * 1, 4)
             df_merge_corr[f'{metrica_selecionada}_23'] = round((df_merge_corr[f'{metrica_selecionada}_23']) * 1, 4)
             st.dataframe(df_merge_corr)
 
 
-st.markdown("---")
-with st.container(border=True):
-    st.markdown("## 📦 Associação de Variáveis: 2019 vs 2023")
-    st.write("Boxplots comparativos com uma variável qualitativa (ano de análise) e outra quantitativa (a métrica selecionada), para visualizar a distribuição e variações entre os anos.")
+    # st.markdown("---")
+    with st.container(border=True):
+        st.markdown("## 📊 Desigualdade Social ainda reflete na nota em 2023")
+        st.markdown("---")
+        st.markdown("### 📦 Boxplot 2019 vs 2023")
+        st.write("Boxplots comparativos com uma variável qualitativa (ano de análise) e outra quantitativa (a métrica selecionada), para visualizar a distribuição e variações entre os anos.")
+        box1, box2 = st.columns(2)
+        with box1:
+            # 1. Boxplot dinâmico da métrica selecionada
+            fig1, ax1 = plt.subplots(figsize=(6, 4))
+            data_group1_sel = df19[metrica_selecionada].dropna()
+            data_group2_sel = df23[metrica_selecionada].dropna()
+            ax1.boxplot([data_group1_sel, data_group2_sel], positions=[1, 2], labels=['2019', '2023'])
+            ax1.set_title(f'Comparação de {metrica_selecionada}: 2019 vs 2023')
+            ax1.set_ylabel(metrica_selecionada)
+            ax1.grid(True, axis='y', linestyle='--', alpha=0.7)
+            st.pyplot(fig1)
 
-    # 1. Boxplot dinâmico da métrica selecionada
-    fig1, ax1 = plt.subplots(figsize=(6, 4))
-    data_group1_sel = df19[metrica_selecionada].dropna()
-    data_group2_sel = df23[metrica_selecionada].dropna()
-    ax1.boxplot([data_group1_sel, data_group2_sel], positions=[1, 2], labels=['2019', '2023'])
-    ax1.set_title(f'Comparação de {metrica_selecionada}: 2019 vs 2023')
-    ax1.set_ylabel(metrica_selecionada)
-    ax1.grid(True, axis='y', linestyle='--', alpha=0.7)
-    st.pyplot(fig1)
+        with box2:
+            # 2. Boxplot estático da nota média geral
+            fig2, ax2 = plt.subplots(figsize=(6, 4))
+            data_group1_nota = df19['Nota_Media_Geral'].dropna()
+            data_group2_nota = df24['Nota_Media_Geral'].dropna()
+            ax2.boxplot([data_group1_nota, data_group2_nota], positions=[1, 2], labels=['2019', '2023'])
+            ax2.set_title('Comparação de Nota Média Geral: 2019 vs 2023')
+            ax2.set_ylabel('Nota Média Geral')
+            ax2.grid(True, axis='y', linestyle='--', alpha=0.7)
+            st.pyplot(fig2)
+    with st.container(border=True):
+        st.markdown("### Gráfico Comparativo: Alta Estrutura X Baixa Estrutura")
+        st.markdown("#### 📦 Estagnação na Educação em 2023 foi perceptível")
+        img1, img2 = st.columns(2)
+        with img1:
+            st.image(img_ideb)
+        with img2:
+            st.image(img_ideb_ce)
+        st.write("O panorama é preocupante pois a desigualdade entre as escolas estruturadas e as não estruturadas se manteve, mesmo que o acesso à informação tenha se democratizado.")
+        st.markdown("### 📦 Associação de Variáveis: Escolas de Alta Estrutura vs Escolas de Baixa Estrutura ")
+        st.write("Boxplots comparativos entre escolas com alta estrutura (Federal e Privada) e baixa estrutura (Municipal e Estadual), para visualizar se houve uma mudança no GAP entre esses grupos ao longo do tempo.")
+        st.image(img_box)
+    with st.container(border=True):
+        st.markdown("### 📦 IDEB")
+        st.write("O Índice de Desenvolvimento da Educação Básica (IDEB) é um indicador que mede a qualidade do ensino nas escolas brasileiras. Ele combina dados de desempenho acadêmico (notas em avaliações padronizadas) e taxas de aprovação escolar para fornecer uma visão geral do sistema educacional.")
+        # correlacao_ideb = df19['IDEB19'].corr(df19_corr['Nota_Media_Geral'])
 
-    # 2. Boxplot estático da nota média geral
-    fig2, ax2 = plt.subplots(figsize=(6, 4))
-    data_group1_nota = df19['Nota_Media_Geral'].dropna()
-    data_group2_nota = df24['Nota_Media_Geral'].dropna()
-    ax2.boxplot([data_group1_nota, data_group2_nota], positions=[1, 2], labels=['2019', '2023'])
-    ax2.set_title('Comparação de Nota Média Geral: 2019 vs 2023')
-    ax2.set_ylabel('Nota Média Geral')
-    ax2.grid(True, axis='y', linestyle='--', alpha=0.7)
-    st.pyplot(fig2)
+        # 2. Exibindo a Métrica Atualizada
+        corr_ideb_19 = df19[['Nota_Media_Geral', 'IDEB19']].corr().iloc[0,1]
+        corr_ideb_23 = df23[['Nota_Media_Geral', 'IDEB23']].corr().iloc[0,1]
+        corr_ideb_taxa_19 = df19[['Taxa_Inclusao_Digital', 'IDEB19']].corr().iloc[0,1]
+        corr_ideb_taxa_23 = df23[['Taxa_Inclusao_Digital', 'IDEB23']].corr().iloc[0,1]
+        ideb19, ideb23 = st.columns(2)
+        with ideb19:
+            st.metric(label="Correlação (IDEB vs ENEM)", value=f"{corr_ideb_19:.2f}")
+            # 3. Gerando o Gráfico
+            fig_corr19 = px.scatter(
+                    df19,
+                    x='IDEB19', # <--- AQUI: Mudamos para a coluna do IDEB
+                    y='Nota_Media_Geral',
+                    title=f'2019: Impacto do IDEB na Nota do ENEM',
+                    labels={'IDEB19': f'Nota do IDEB (2019)', 'Nota_Media_Geral': 'Nota Média ENEM'},
+                    color_discrete_sequence=['#8e44ad'],
+                    # trendline="ols" # DICA: Adiciona a linha de tendência para provar a correlação visualmente
+            )
+
+            st.plotly_chart(fig_corr19, use_container_width=True)
+            st.markdown("---")
+            st.markdown("\n\n")
+
+    
+            st.metric(label="Correlação (IDEB vs Taxa de Suporte Digital)", value=f"{corr_ideb_taxa_19:.2f}")
+            # 3. Gerando o Gráfico
+            fig_corr_taxa_19 = px.scatter(
+                    df19,
+                    x='IDEB19', # <--- AQUI: Mudamos para a coluna do IDEB
+                    y='Taxa_Inclusao_Digital',
+                    title=f'2019: Correlação entre IDEB e Taxa de Suporte Digital',
+                    labels={'IDEB19': f'Nota do IDEB (2019)', 'Taxa_Inclusao_Digital': 'Taxa de Suporte Digital'},
+                    color_discrete_sequence=['#8e44ad'],
+                    # trendline="ols" # DICA: Adiciona a linha de tendência para provar a correlação visualmente
+            )
+
+            st.plotly_chart(fig_corr_taxa_19, use_container_width=True)
+        with ideb23:
+            st.metric(label="Correlação (IDEB vs ENEM)", value=f"{corr_ideb_23:.2f}")
+            fig_corr23 = px.scatter(
+                    df23,
+                    x='IDEB23', # <--- AQUI: Mudamos para a coluna do IDEB
+                    y='Nota_Media_Geral',
+                    title='2023: Impacto do IDEB na Nota do ENEM',
+                    labels={'IDEB23': f'Nota do IDEB (2023)', 'Nota_Media_Geral': 'Nota Média ENEM'},
+                    color_discrete_sequence=['#ff9f43'],
+                    # trendline="ols" # DICA: Adiciona a linha de tendência para provar a correlação visualmente
+            )
+            st.plotly_chart(fig_corr23, use_container_width=True)
+            st.markdown("---")
+            st.markdown("\n\n")
+
+            st.metric(label="Correlação (IDEB vs Taxa de Suporte Digital)", value=f"{corr_ideb_taxa_23:.2f}")
+            # 3. Gerando o Gráfico
+            fig_corr_taxa_23 = px.scatter(
+                    df23,
+                    x='IDEB23', # <--- AQUI: Mudamos para a coluna do IDEB
+                    y='Taxa_Inclusao_Digital',
+                    title=f'2023: Correlação entre IDEB e Taxa de Suporte Digital',
+                    labels={'IDEB23': f'Nota do IDEB (2023)', 'Taxa_Inclusao_Digital': 'Taxa de Suporte Digital'},
+                    color_discrete_sequence=['#ff9f43'],
+                    # trendline="ols" # DICA: Adiciona a linha de tendência para provar a correlação visualmente
+            )
+
+            st.plotly_chart(fig_corr_taxa_23, use_container_width=True)
+        st.subheader("💡 Análise do Cenário")
+        st.write("O IDEB perdeu parte de sua capacidade de representar o aprendizado real no cenário pós-pandemia.\nIsso ocorre, em partes, porque houve um mascaramento dos efeitos reais da pandemia nas avaliações internas.")
+ 
+
+
+        
+
+    
 
 
 st.markdown("---")
@@ -419,7 +519,7 @@ with st.container(border=True):
     - Recomendação: Políticas públicas devem focar em hardware (computadores/notebooks) para alunos de baixa renda, enquanto incentivam o uso ético de IA em redação e estudos.
     
     ### Recomendações Estratégicas
-    - **Para Governos e Escolas**: Investir em distribuição de equipamentos, não apenas conectividade. Programas como "Um Computador por Aluno" devem ser priorizados.
+    - **Para Governos e Escolas**: Investir em distribuição de equipamentos, não apenas conectividade. Programas para fornecimento de dispositivos adequados ao estudo devem ser priorizados.
     - **Para Educadores**: Adaptar currículos para incluir habilidades digitais móveis, mas sem negligenciar o treinamento em ferramentas avançadas (ex.: programação, análise de dados).
     - **Para Pesquisa Futura**: Investigar o impacto causal de IA generativa via inferência causal (ex.: propensity score matching), considerando confundidores socioeconômicos.
     

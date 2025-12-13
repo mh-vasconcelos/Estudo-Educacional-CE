@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
-from img import img_list, img_box, img_ideb, img_ideb_ce, mapa_taxa
+from img import img_list, img_box, img_ideb, img_ideb_ce, mapa_taxa, box_23, box_19
 from func import grafico_comparativo, gerar_histograma
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
@@ -473,14 +473,22 @@ with st.container(border=True):
         st.subheader("💡 Análise do Cenário")
         st.write("O IDEB perdeu parte de sua capacidade de representar o aprendizado real no cenário pós-pandemia.\nIsso ocorre, em partes, porque houve um mascaramento dos efeitos reais da pandemia nas avaliações internas.")
  
-
+    with st.container(border=True):
+        st.markdown("### 📊 Ocupação do pai do aluno")
+        st.markdown("#### 📦 A Inclusão Digital teve um impacto significativo no desempenho dos alunos")
+        st.write("A análise foi realizada buscando entender de que forma a ocupação dos pais, enquanto indicador socioeconômico, se relaciona com o desempenho médio educacional das cidades. O boxplot foi escolhido não apenas para comparar as medianas, mas também analisar a dispersão dos dados e a presença de outliers (cidades que fujam do padrão).")
+        img1, img2 = st.columns(2)
+        with img1:
+            st.image(box_19)
+        with img2:
+            st.image(box_23)
+        st.subheader("💡 Análise do Cenário")
+        st.write("Ao comparar os cenários pré e pós-pandemia, observa-se que a hierarquia socioeconômica se manteve rígida. Em ambos os anos, municípios com predominância de ocupações de alta qualificação apresentam consistentemente as maiores medianas de nota, distanciando-se dos demais grupos.")
 
         
 
     
 
-
-st.markdown("---")
 with st.container(border=True):
     st.markdown(f"## {icone} Hipótese da IA Generativa (Comparativo 2024)")
     

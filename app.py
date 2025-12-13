@@ -16,16 +16,15 @@ def load_data():
     df24 = pd.read_csv('indicadores24.csv')
     df23 = pd.read_csv('indicadores23.csv')    
 
-    df19 = df19.rename(columns={
-        'NO_MUNICIPIO_PROVA': 'MUNICIPIO', 
-        'Computador': 'Total_Computador', 
-        'Internet': 'Total_Internet'
-    })
-    df23 = df23.rename(columns={
-        'NO_MUNICIPIO_PROVA': 'MUNICIPIO', 
-        'Computador': 'Total_Computador', 
-        'Internet': 'Total_Internet'
-    })
+    cols_rename = {
+            'NO_MUNICIPIO_PROVA': 'MUNICIPIO', 
+            'Computador': 'Total_Computador', 
+            'Internet': 'Total_Internet'
+        }
+
+    df19 = df19.rename(columns=cols_rename)
+    df23 = df23.rename(columns=cols_rename)
+    df24 = df24.rename(columns=cols_rename)
     
     return df19, df23, df24
 
@@ -483,14 +482,22 @@ with st.container(border=True):
 
 st.markdown("---")
 with st.container(border=True):
-    st.markdown(f"## {icone} Hipótese da IA Generativa")
-    st.write("Tentamos considerar o efeito revolucionário das Inteligências Artificiais Generativas, que poderiam ter influenciado a subida da nota, especialmente em redação, apesar da baixa adesão à dispositivos adequados.")
+    st.markdown(f"## {icone} Hipótese da IA Generativa (Comparativo 2024)")
+    
     col1, col2 = st.columns(2)
     with col1:
-        st.image(img_list[0], use_container_width=True) # use_container_width ajusta ao tamanho da coluna
+        st.image(img_list[0], use_container_width=True)
     with col2:
         st.image(img_list[1], use_container_width=True)
-    grafico_comparativo(df_indicadores_mun=df19, df_indicadores_mun24=df24, notas=True)
+    
+    st.write("Comparando o cenário pré-pandemia (2019) com o cenário mais recente (2024):")
+    
+    # AQUI VOCÊ USA O DF24
+    grafico_comparativo(
+        df_indicadores_mun=df19,    # Base antiga
+        df_indicadores_mun24=df24,  # Base nova (2024)
+        notas=True
+    )
 
 st.markdown("---")
 with st.container(border=True):
